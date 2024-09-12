@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Réécriture de paragraphes individuels en temps réel</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link href="https://fonts.cdnfonts.com/css/fira-mono" rel="stylesheet" />
+	</head>
+	<body class="w-full h-lvh">
+		<div class="w-full h-full flex flex-col items-baseline p-4 gap-4">
+			<nav class="flex items-center">
+				<div class="bg-gray-100 rounded-full h-10 text-sm text-neutral-900 px-6 flex items-center font-medium">Journal Note 01-08-2024</div>
+				<div class="rounded-full h-8 text-sm text-neutral-900 px-6 flex items-center font-medium">Untitled</div>
+			</nav>
+			<div class="w-full flex flex-grow gap-4" style="font-family: 'Fira Mono', sans-serif">
+				<textarea spellcheck="false" class="outline-none h-full bg-gray-100 rounded-3xl p-8 resize-none w-1/2 md:w-full" id="inputText" placeholder="Tapez votre texte ici..."></textarea>
+				<div class="bg-[#f9effa] h-full rounded-3xl p-8 border-[#c892e7] border shadow-sm w-1/2 md:w-full overflow-y-auto" id="outputText"></div>
+			</div>
+		</div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+		<script>
+			const inputText = document.getElementById("inputText");
+			const outputText = document.getElementById("outputText");
+			let processedParagraphs = [];
+			let lastRewrittenIndex = -1;
+
+			const rewriteParagraphs = async (paragraphs) => {
+				try {
+					const response = await fetch("http://localhost:11434/api/chat", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							model: "gemma2:2b",
+							messages: [
+								{
+									role: "system",
+									content: `You're an assistant specializing in rewriting text in a natural and engaging tone.
+                        Focus on maintaining the meaning and structure, but feel free to use more varied vocabulary,
+                        occasional informal language, and adjust phrasing to sound less robotic.`,
+								},
+								{
+									role: "user",
+									content: paragraphs.join("\n\n"),
+								},
+							],
+							stream: false,
+						}),
+					});
+					const data = await response.json();
+					return data.message.content.trim().split("\n\n");
+				} catch (error) {
+					console.error("Erreur:", error);
+					return paragraphs.map(() => "Une erreur est survenue lors de la réécriture du paragraphe.");
+				}
+			};
+
+			const processText = async () => {
+				const text = inputText.value;
+				const currentParagraphs = text
+					.split("\n")
+					.map((p) => p.trim())
+					.filter((p) => p !== "");
+
+				const paragraphsToRewrite = [];
+				const rewrittenParagraphs = [];
+
+				for (let i = 0; i < currentParagraphs.length; i++) {
+					if (i >= processedParagraphs.length || currentParagraphs[i] !== processedParagraphs[i].original) {
+						paragraphsToRewrite.push(currentParagraphs[i]);
+						rewrittenParagraphs.push(i);
+					} else {
+						rewrittenParagraphs.push(processedParagraphs[i].rewritten);
+					}
+				}
+
+				if (paragraphsToRewrite.length > 0) {
+					const newRewrittenParagraphs = await rewriteParagraphs(paragraphsToRewrite);
+					let rewrittenIndex = 0;
+					for (let i = 0; i < rewrittenParagraphs.length; i++) {
+						if (typeof rewrittenParagraphs[i] === "number") {
+							processedParagraphs[i] = {
+								original: currentParagraphs[i],
+								rewritten: newRewrittenParagraphs[rewrittenIndex],
+							};
+							rewrittenParagraphs[i] = newRewrittenParagraphs[rewrittenIndex];
+							lastRewrittenIndex = i;
+							rewrittenIndex++;
+						}
+					}
+				}
+
+				// Remove any extra processed paragraphs if the input has fewer paragraphs now
+				processedParagraphs = processedParagraphs.slice(0, currentParagraphs.length);
+
+				outputText.innerHTML = rewrittenParagraphs.map((p, index) => `<p class="mb-4 text-[${index === lastRewrittenIndex ? "#5D00B9" : "#B26ADC"}]">${p}</p>`).join("");
+			};
+
+			const debouncedProcessText = _.debounce(processText, 1000);
+
+			inputText.addEventListener("input", debouncedProcessText);
+		</script>
+	</body>
+</html>
