@@ -175,8 +175,11 @@
 		};
 	});
 
+	$: activeParagraphIndex = outputParagraphs.findIndex((p) => p.isActive);
+
+
 	function getOutputColorStyle(isActive: boolean, isComplete: boolean): string {
-		if (!isComplete) return "color: #B26ADC;";
+		// if (!isComplete) return "color: #B26ADC;";
 		return isActive ? "color: #5500B5;" : "color: #B26ADC;";
 	}
 </script>

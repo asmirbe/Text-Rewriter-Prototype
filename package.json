@@ -1,7 +1,7 @@
 {
-	"name": "journal",
+	"name": "text-rewriter-co-pilot-prototype",
 	"version": "0.0.1",
-	"description": "A journaling app",
+	"description": "A prototype for a text rewriter using Gemma and Ollama",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
