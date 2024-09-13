@@ -38,21 +38,14 @@
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					model: "gemma2:2b",
-					prompt: `Rewrite the following text in a natural and engaging tone.
-                   Maintain the meaning and structure, but use more varied vocabulary,
-                   occasional informal language, and adjust phrasing to sound less robotic.
-                   Only output the rewritten text, without any additional comments/note.
-						 The output text must be at least 90% unique.
-						 Do not surround the text with quotation marks or any other special characters.
-
-                   Text to rewrite:
-                   ${paragraph}`,
+					model: "pdevine/grammarfix",
+					prompt: paragraph,
 					stream: true,
 				}),
 			});
 
 			const reader = response.body!.getReader();
+			// Remove quotes, double quotes, and backslashes from the reader
 			const decoder = new TextDecoder();
 
 			outputParagraphs = outputParagraphs.map((p) => (p.id === id ? { ...p, text: "", isComplete: false } : p));
