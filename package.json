@@ -1,5 +1,5 @@
 {
-	"name": "text-rewriter-co-pilot-prototype",
+	"name": "ai-rephraser",
 	"version": "0.0.1",
 	"description": "A prototype for a text rewriter using Gemma and Ollama",
 	"private": true,
