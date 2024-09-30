@@ -1,4 +1,4 @@
-# Text Rewriter Prototype
+# ai-rephraser
 
 This project is a prototype for an interactive text rewriting application using a local LLM (Ollama with Gemma 2B) for real-time paragraph rewriting. It's built with Svelte and TipTap, providing a smooth, responsive user experience.
 
