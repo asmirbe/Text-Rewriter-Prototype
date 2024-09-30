@@ -62,10 +62,6 @@ This project is a prototype for an interactive text rewriting application using 
 - Error handling could be improved for more robust performance.
 - The UI could be enhanced with additional features like saving rewrites, comparing versions, etc.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
